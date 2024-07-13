@@ -40,6 +40,23 @@ const purchaseSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  comments: [
+    {
+      commentText: {
+        type: String,
+        required: true,
+      },
+      commentedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      commentedOn: {
+        type: Date,
+        default: Date.now(),
+      },
+    },
+  ],
 });
 
 purchaseSchema.pre("save", async function (next) {

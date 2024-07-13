@@ -29,9 +29,6 @@ const userSchema = new mongoose.Schema({
   pinCode: {
     type: Number,
   },
-  district: {
-    type: String,
-  },
   city: {
     type: String,
   },
@@ -104,7 +101,10 @@ userSchema.pre("save", async function (next) {
     for (const purchasedService of this.purchasedServices) {
       await Purchase.updateOne(
         { user: this._id, service: purchasedService.serviceId },
-        { serviceStatus: purchasedService.serviceStatus }
+        {
+          serviceStatus: purchasedService.serviceStatus,
+          comments: purchasedService.comments,
+        }
       );
     }
   }

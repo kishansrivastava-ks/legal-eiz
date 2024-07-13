@@ -7,6 +7,7 @@ const Service = require("../models/serviceModel");
 const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const mongoose = require("mongoose");
 
 // CREATE A NEW USER
 exports.createUser = catchAsync(async (req, res, next) => {
@@ -213,7 +214,7 @@ exports.updateServiceStatus = catchAsync(async (req, res, next) => {
   });
 });
 
-// ADD COMMENT TO SERVIVE - BY A PARTNER
+// ADD COMMENT TO A SERVICE - BY A PARTNER
 exports.addCommentToService = catchAsync(async (req, res, next) => {
   const { userId, serviceId, comment, commentedBy } = req.body;
 
@@ -252,5 +253,43 @@ exports.addCommentToService = catchAsync(async (req, res, next) => {
         comments: service.comments,
       },
     },
+  });
+});
+
+// DELETE A COMMENT - FOR PARTNERS
+exports.deleteComment = catchAsync(async (req, res, next) => {
+  const { userId, serviceId, commentId } = req.body;
+
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(serviceId) ||
+    !mongoose.Types.ObjectId.isValid(commentId)
+  ) {
+    return next(new AppError("Invalid ID format", 400));
+  }
+  const user = await User.findById(userId);
+
+  if (!user) return next(new AppError("No user found with that id", 404));
+
+  const service = user.purchasedServices.find(
+    (s) => s.serviceId.toString() == serviceId
+  );
+  console.log(service);
+  if (!service) return next(new AppError("No service found with that id", 404));
+
+  const comment = service.comments.find((c) => c._id.toString() === commentId);
+  console.log(comment);
+
+  if (!comment) return next(new AppError("No comment found with that id", 404));
+
+  // delete the comment
+  service.comments = service.comments.filter(
+    (c) => c._id.toString() !== commentId
+  );
+
+  await user.save();
+  res.status(200).json({
+    status: "success",
+    message: "comment deleted successfully",
   });
 });

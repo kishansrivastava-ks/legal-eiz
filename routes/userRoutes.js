@@ -18,6 +18,8 @@ router.route("/update-service-status").post(userController.updateServiceStatus);
 
 router.route("/add-comment").post(userController.addCommentToService);
 
+router.route("/delete-comment").post(userController.deleteComment);
+
 router
   .route("/:email")
   .get(userController.getUserByEmail)
